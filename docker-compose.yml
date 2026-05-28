@@ -30,6 +30,8 @@ services:
       # - ${HOME}/.codex:/data/home/.codex:ro
     # Keep stdin/tty open so `docker exec -it openalice claude` can run
     # the interactive OAuth flow.
+    environment:
+      - OPENALICE_MCP_URL=http://127.0.0.1:47332/mcp
     stdin_open: true
     tty: true
 
