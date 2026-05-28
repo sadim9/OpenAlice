@@ -32,6 +32,7 @@ services:
     # the interactive OAuth flow.
     environment:
       - OPENALICE_MCP_URL=http://127.0.0.1:47332/mcp
+    user: "1000:1000"
     stdin_open: true
     tty: true
 
