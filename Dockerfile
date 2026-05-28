@@ -54,8 +54,9 @@ WORKDIR /app
 # instead of getting dropped by Node's default PID-1 behaviour, and
 # zombies from short-lived children (workspace CLI auth flows, etc.)
 # get reaped.
-RUN apt-get update && apt-get install -y --no-install-recommends tini git \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends tini git gosu \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -m -u 1000 -s /bin/bash alice
 
 # Two agent CLIs installed globally so they're on PATH for the PTY
 # sessions OpenAlice spawns. Both come from npm (codex's npm package is
@@ -118,5 +119,10 @@ EXPOSE 47331
 
 # tini handles signal forwarding + zombie reaping; Guardian then spawns
 # UTA → Alice and supervises the lifecycle (see scripts/guardian/prod.mjs).
-ENTRYPOINT ["/usr/bin/tini", "--"]
+COPY --chmod=755 /dev/stdin /entrypoint.sh << 'SCRIPT'
+#!/bin/sh
+chown -R alice:alice /data
+exec gosu alice /usr/bin/tini -- "$@"
+SCRIPT
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", "scripts/guardian/prod.mjs"]
