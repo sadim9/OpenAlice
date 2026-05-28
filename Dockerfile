@@ -35,7 +35,8 @@ RUN pnpm install --frozen-lockfile
 # backend into `dist/main.js`. UTA service ends up at
 # `services/uta/dist/uta.js`.
 COPY . .
-RUN pnpm build
+RUN NODE_OPTIONS="--max-old-space-size=1500" pnpm turbo run build --filter=!@traderalice/desktop --concurrency=1 && \
+    NODE_OPTIONS="--max-old-space-size=1500" pnpm tsup src/main.ts --format esm --dts
 
 # Strip dev deps before the runtime stage harvests node_modules. With
 # `electron` + `electron-builder` (each ~500MB) in devDependencies, this
